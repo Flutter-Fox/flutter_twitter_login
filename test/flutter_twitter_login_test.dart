@@ -6,7 +6,7 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   group('$TwitterLogin', () {
-    const MethodChannel channel = const MethodChannel(
+    const MethodChannel? channel = const MethodChannel(
       'com.roughike/flutter_twitter_login',
     );
 
@@ -33,20 +33,20 @@ void main() {
     };
 
     final List<MethodCall> log = [];
-    TwitterLogin sut;
+    TwitterLogin? sut;
 
-    void setMethodCallResponse(Map<String, dynamic> response) {
+    void setMethodCallResponse(Map<String, dynamic>? response) {
       channel.setMockMethodCallHandler((MethodCall methodCall) {
         log.add(methodCall);
         return new Future.value(response);
       });
     }
 
-    void expectSessionParsedCorrectly(TwitterSession session) {
-      expect(session.username, 'test_user_name');
-      expect(session.userId, 'abc123');
-      expect(session.token, 'test_access_token');
-      expect(session.secret, 'test_secret');
+    void expectSessionParsedCorrectly(TwitterSession? session) {
+      expect(session?.username, 'test_user_name');
+      expect(session?.userId, 'abc123');
+      expect(session?.token, 'test_access_token');
+      expect(session?.secret, 'test_secret');
     }
 
     setUp(() {
@@ -59,8 +59,6 @@ void main() {
     });
 
     test('can not call constructor with null or empty key or secret', () {
-      expect(() => new TwitterLogin(consumerKey: null, consumerSecret: null),
-          throwsA(anything));
       expect(() => new TwitterLogin(consumerKey: '', consumerSecret: ''),
           throwsA(anything));
     });
@@ -68,7 +66,7 @@ void main() {
     test('get isSessionActive - false when currentSession is null', () async {
       setMethodCallResponse(null);
 
-      final bool isSessionActive = await sut.isSessionActive;
+      final isSessionActive = await sut?.isSessionActive;
       expect(isSessionActive, isFalse);
       expect(log, [
         isMethodCall(
@@ -82,7 +80,7 @@ void main() {
         () async {
       setMethodCallResponse(kSessionMap);
 
-      final bool isSessionActive = await sut.isSessionActive;
+      final isSessionActive = await sut?.isSessionActive;
       expect(isSessionActive, isTrue);
       expect(log, [
         isMethodCall(
@@ -95,7 +93,7 @@ void main() {
     test('get currentSession - handles null response gracefully', () async {
       setMethodCallResponse(null);
 
-      final TwitterSession session = await sut.currentSession;
+      final session = await sut?.currentSession;
       expect(session, isNull);
       expect(log, [
         isMethodCall(
@@ -108,7 +106,7 @@ void main() {
     test('get currentSession - parses session correctly', () async {
       setMethodCallResponse(kSessionMap);
 
-      final TwitterSession session = await sut.currentSession;
+      final session = await sut?.currentSession;
       expectSessionParsedCorrectly(session);
       expect(log, [
         isMethodCall(
@@ -121,7 +119,7 @@ void main() {
     test('authorize - calls the right method', () async {
       setMethodCallResponse(kLoggedInResponse);
 
-      await sut.authorize();
+      await sut?.authorize();
 
       expect(log, [
         isMethodCall(
@@ -134,10 +132,10 @@ void main() {
     test('authorize - user logged in', () async {
       setMethodCallResponse(kLoggedInResponse);
 
-      final TwitterLoginResult result = await sut.authorize();
+      final result = await sut?.authorize();
 
-      expect(result.status, TwitterLoginStatus.loggedIn);
-      expectSessionParsedCorrectly(result.session);
+      expect(result?.status, TwitterLoginStatus.loggedIn);
+      expectSessionParsedCorrectly(result?.session);
     });
 
     test('authorize - cancelled by user', () async {
@@ -146,29 +144,29 @@ void main() {
         'errorMessage': 'Authorization failed, request was canceled.',
       });
 
-      final TwitterLoginResult androidResult = await sut.authorize();
-      expect(androidResult.status, TwitterLoginStatus.cancelledByUser);
+      final androidResult = await sut?.authorize();
+      expect(androidResult?.status, TwitterLoginStatus.cancelledByUser);
 
       setMethodCallResponse({
         'status': 'error',
         'errorMessage': 'User cancelled authentication.',
       });
 
-      final TwitterLoginResult iosResult = await sut.authorize();
-      expect(iosResult.status, TwitterLoginStatus.cancelledByUser);
+      final iosResult = await sut?.authorize();
+      expect(iosResult?.status, TwitterLoginStatus.cancelledByUser);
     });
 
     test('authorize - error', () async {
       setMethodCallResponse(kErrorResponse);
 
-      final TwitterLoginResult result = await sut.authorize();
-      expect(result.status, TwitterLoginStatus.error);
+      final result = await sut?.authorize();
+      expect(result?.status, TwitterLoginStatus.error);
     });
 
     test('logout', () async {
       setMethodCallResponse(null);
 
-      await sut.logOut();
+      await sut?.logOut();
 
       expect(log, [
         isMethodCall(

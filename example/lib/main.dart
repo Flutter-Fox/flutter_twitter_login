@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_twitter_login/flutter_twitter_login.dart';
 
 void main() => runApp(new MyApp());
@@ -11,19 +10,19 @@ class MyApp extends StatefulWidget {
 
 class _MyAppState extends State<MyApp> {
   static final TwitterLogin twitterLogin = new TwitterLogin(
-    consumerKey: 'kkOvaF1Mowy4JTvCxKTV5O1WF',
-    consumerSecret: 'ZECGsI6UUDBEUVGkJe4S5vd0FGqGxC3wMJCgsXgPRfjSwRFnyH',
+    consumerKey: 'txQkBHs3tRTyyBmXGrudfn0MU',
+    consumerSecret: 'SwjP6KOZtZb7xawHG7vgVBaTRPHCF7M9Y7XABa0yGt7lAGrCIz',
   );
 
-  String _message = 'Logged out.';
+  String? _message = 'Logged out.';
 
   void _login() async {
     final TwitterLoginResult result = await twitterLogin.authorize();
-    String newMessage;
+    String? newMessage;
 
     switch (result.status) {
       case TwitterLoginStatus.loggedIn:
-        newMessage = 'Logged in! username: ${result.session.username}';
+        newMessage = 'Logged in! username: ${result.session?.username}';
         break;
       case TwitterLoginStatus.cancelledByUser:
         newMessage = 'Login cancelled by user.';
@@ -57,12 +56,12 @@ class _MyAppState extends State<MyApp> {
           child: new Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: <Widget>[
-              new Text(_message),
-              new RaisedButton(
+              new Text('$_message'),
+              new ElevatedButton(
                 child: new Text('Log in'),
                 onPressed: _login,
               ),
-              new RaisedButton(
+              new ElevatedButton(
                 child: new Text('Log out'),
                 onPressed: _logout,
               ),
