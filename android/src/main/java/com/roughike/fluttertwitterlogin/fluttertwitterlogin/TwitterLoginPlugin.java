@@ -5,7 +5,6 @@ import android.webkit.CookieManager;
 import android.webkit.CookieSyncManager;
 
 import com.twitter.sdk.android.core.Callback;
-import com.twitter.sdk.android.core.Result;
 import com.twitter.sdk.android.core.Twitter;
 import com.twitter.sdk.android.core.TwitterAuthConfig;
 import com.twitter.sdk.android.core.TwitterConfig;
@@ -19,7 +18,7 @@ import java.util.HashMap;
 import io.flutter.plugin.common.MethodCall;
 import io.flutter.plugin.common.MethodChannel;
 import io.flutter.plugin.common.MethodChannel.MethodCallHandler;
-import io.flutter.plugin.common.MethodChannel.Result;
+import io.flutter.plugin.common.PluginRegistry;
 
 public class TwitterLoginPlugin extends Callback<TwitterSession> implements MethodCallHandler, PluginRegistry.ActivityResultListener {
     private static final String CHANNEL_NAME = "com.roughike/flutter_twitter_login";
@@ -27,24 +26,24 @@ public class TwitterLoginPlugin extends Callback<TwitterSession> implements Meth
     private static final String METHOD_AUTHORIZE = "authorize";
     private static final String METHOD_LOG_OUT = "logOut";
 
-    private final Registrar registrar;
+    private final PluginRegistry.Registrar registrar;
 
     private TwitterAuthClient authClientInstance;
-    private Result pendingResult;
+    private MethodChannel.Result pendingResult;
 
-    public static void registerWith(Registrar registrar) {
+    public static void registerWith(PluginRegistry.Registrar registrar) {
         final TwitterLoginPlugin plugin = new TwitterLoginPlugin(registrar);
         final MethodChannel channel = new MethodChannel(registrar.messenger(), CHANNEL_NAME);
         channel.setMethodCallHandler(plugin);
     }
 
-    private TwitterLoginPlugin(Registrar registrar) {
+    private TwitterLoginPlugin(PluginRegistry.Registrar registrar) {
         this.registrar = registrar;
         registrar.addActivityResultListener(this);
     }
 
     @Override
-    public void onMethodCall(MethodCall call, Result result) {
+    public void onMethodCall(MethodCall call, MethodChannel.Result result) {
         switch (call.method) {
             case METHOD_GET_CURRENT_SESSION:
                 getCurrentSession(result, call);
@@ -74,7 +73,7 @@ public class TwitterLoginPlugin extends Callback<TwitterSession> implements Meth
         pendingResult = result;
     }
 
-    private void getCurrentSession(Result result, MethodCall call) {
+    private void getCurrentSession(MethodChannel.Result result, MethodCall call) {
         initializeAuthClient(call);
         TwitterSession session = TwitterCore.getInstance().getSessionManager().getActiveSession();
         HashMap<String, Object> sessionMap = sessionToMap(session);
@@ -82,7 +81,7 @@ public class TwitterLoginPlugin extends Callback<TwitterSession> implements Meth
         result.success(sessionMap);
     }
 
-    private void authorize(Result result, MethodCall call) {
+    private void authorize(MethodChannel.Result result, MethodCall call) {
         setPendingResult("authorize", result);
         initializeAuthClient(call).authorize(registrar.activity(), this);
     }
@@ -108,7 +107,7 @@ public class TwitterLoginPlugin extends Callback<TwitterSession> implements Meth
         return new TwitterAuthClient();
     }
 
-    private void logOut(Result result, MethodCall call) {
+    private void logOut(MethodChannel.Result result, MethodCall call) {
         CookieSyncManager.createInstance(registrar.context());
         CookieManager cookieManager = CookieManager.getInstance();
         cookieManager.removeSessionCookie();
